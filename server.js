@@ -1,4 +1,5 @@
 const express = require('express');
+require("dotenv").config();
 const mongoose = require('mongoose');
 const { User, VideoDownload } = require('./database'); // Update path as necessary
 
