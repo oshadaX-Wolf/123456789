@@ -16,7 +16,7 @@ const mongoose = require("mongoose");
 const { User } = require("./database"); // Import the User model
 
 // Initialize bot with polling
-const token = "6234064473:AAES5BMJt3cTs3i7_vVt8T-jjqoAzNiIGp8"; // Store your bot token securely
+const token = "6162835664:AAH4U09W70ro9ltzJ4ikopkccIc-YKl3B5U"; // Store your bot token securely
 const bot = new TelegramBot(token, { polling: true });
 
 const adminId = "5310455183"; // Replace with your Telegram user ID
