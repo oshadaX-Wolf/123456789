@@ -1,3 +1,4 @@
+require("dotenv").config();
 const TelegramBot = require("node-telegram-bot-api");
 const { ttdl } = require("btch-downloader");
 const { VideoDownload } = require("./database"); // Update path as necessary
