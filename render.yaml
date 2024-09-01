@@ -3,10 +3,10 @@ services:
   - type: web
     plan: free
     name: RenameSnowProBot
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python bot.py
-    repo: https://github.com/oshadaX-Wolf/tiktok-tele-bot.git
+    env: node
+    buildCommand: npm install
+    startCommand: node index.js
+    repo: https://github.com/oshadaX-Wolf/123456789.git
     branch: main
     autoDeploy: false
     
