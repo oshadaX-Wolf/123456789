@@ -1,7 +1,4 @@
 const TelegramBot = require("node-telegram-bot-api");
-async function main() {
-  const got = (await import('got')).default;
-
   const { ttdl } = require("btch-downloader");
 const { ttdl } = require("btch-downloader");
 const { VideoDownload } = require("./database"); // Update path as necessary
