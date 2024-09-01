@@ -1,5 +1,7 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { ttdl } = require("btch-downloader");
+const { VideoDownload } = require("./database"); // Update path as necessary
+
 const util = require("util");
 const chalk = require("chalk");
 const figlet = require("figlet");
@@ -9,12 +11,13 @@ const fs = require("fs");
 const request = require("request");
 const app = express();
 const port = process.env.PORT || 8080;
+const mongoose = require("mongoose");
+const { User } = require("./database"); // Import the User model
 
 // Initialize bot with polling
-const token = '6162835664:AAH4U09W70ro9ltzJ4ikopkccIc-YKl3B5U'; // Store your bot token securely
+const token = "6234064473:AAES5BMJt3cTs3i7_vVt8T-jjqoAzNiIGp8"; // Store your bot token securely
 const bot = new TelegramBot(token, { polling: true });
 
-let users = new Set();
 const adminId = "5310455183"; // Replace with your Telegram user ID
 
 // Express server
@@ -104,9 +107,16 @@ bot.onText(/^\/runtime$/, (msg) => {
 });
 
 // /start command with three buttons
-bot.onText(/^\/start$/, (msg) => {
+bot.onText(/^\/start$/, async (msg) => {
   const From = msg.chat.id;
-  users.add(From); // Track the user
+
+  // Add user to MongoDB
+  await User.findOneAndUpdate(
+    { userId: From.toString() },
+    { userId: From.toString() },
+    { upsert: true },
+  );
+
   const caption = `
 ✨ *Welcome to TikTok Downloader Bot!* ✨
 I'm here to help you download TikTok videos automatically. Just send me the TikTok URL and I'll do the rest! 
@@ -139,6 +149,11 @@ Feel free to share this bot with your friends!`;
     From,
     "CAACAgIAAxkBAAECWvtm0MgJmvhfy5ZTc83aNr0wU9GxpQACcSAAAr6A-Uqv-laZwM-fdzUE",
   ); // Replace with your sticker file ID
+
+  // Notify admin of new user
+  if (From.toString() !== adminId) {
+    await bot.sendMessage(adminId, `🔔 New user started the bot: ${From}`);
+  }
 });
 
 // Handle button clicks
@@ -189,10 +204,11 @@ bot.onText(/^\/owner$/, (msg) => {
 });
 
 // /usercount command for admin to check the user count
-bot.onText(/^\/usercount$/, (msg) => {
+bot.onText(/^\/usercount$/, async (msg) => {
   const From = msg.chat.id;
   if (From.toString() === adminId) {
-    const userCountMessage = `📊 *Total Users*: ${users.size}`;
+    const userCount = await User.countDocuments({});
+    const userCountMessage = `📊 *Total Users*: ${userCount}`;
     bot.sendMessage(From, userCountMessage, { parse_mode: "Markdown" });
   } else {
     bot.sendMessage(From, "❌ You do not have permission to use this command.");
@@ -220,17 +236,23 @@ bot.onText(/^\/broadcast (.+)$/, async (msg, match) => {
     return;
   }
 
+  const users = await User.find({});
+
   let successCount = 0;
   let failureCount = 0;
 
-  for (const userId of users) {
+  for (const user of users) {
     try {
-      await bot.sendMessage(userId, `📢 *Broadcast Message*\n\n${message}`, {
-        parse_mode: "Markdown",
-      });
+      await bot.sendMessage(
+        user.userId,
+        `📢 *Broadcast Message*\n\n${message}`,
+        {
+          parse_mode: "Markdown",
+        },
+      );
       successCount++;
     } catch (error) {
-      console.log(`Failed to send message to ${userId}: ${error.message}`);
+      console.log(`Failed to send message to ${user.userId}: ${error.message}`);
       failureCount++;
     }
   }
@@ -242,12 +264,12 @@ bot.onText(/^\/broadcast (.+)$/, async (msg, match) => {
   );
 });
 
-// Handling messages with TikTok URLs
+// Handling messages with TikTok URLs and downloading video
 bot.on("message", async (msg) => {
   Figlet();
   logs("Success activated", "green");
   const From = msg.chat.id;
-  users.add(From); // Track the user
+
   const body = /^https:\/\/.*tiktok\.com\/.+/;
   if (body.test(msg.text)) {
     const url = msg.text;
@@ -291,6 +313,14 @@ bot.on("message", async (msg) => {
           .on("finish", () => resolve())
           .on("error", (err) => reject(err));
       });
+
+      // Increment video download count
+      const videoId = url; // Use a unique identifier for the video
+      await VideoDownload.findOneAndUpdate(
+        { videoId },
+        { $inc: { downloadCount: 1 } },
+        { upsert: true },
+      );
 
       // Prepare video message
       await bot.editMessageText(`🔄 Downloading your TikTok video... 100%`, {
@@ -338,7 +368,6 @@ bot.on("message", async (msg) => {
     }
   }
 });
-
 // Function to pause execution for a specified time
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
