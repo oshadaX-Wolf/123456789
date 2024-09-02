@@ -21,7 +21,12 @@ const bot = new TelegramBot(token, { polling: true });
 
 const adminId = "5310455183"; // Replace with your Telegram user ID
 
-/// Express server to display user count
+// Function to pause execution for a specified time
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Express server to display user count and download TikTok videos
 app.get("/", async (req, res) => {
   try {
     const userCount = await User.countDocuments({});
@@ -49,6 +54,54 @@ app.get("/usercount", async (req, res) => {
     res.send(`<h1>Total Users: ${userCount}</h1>`);
   } catch (err) {
     res.status(500).send("Error retrieving user count");
+  }
+});
+
+// Endpoint to download TikTok video
+app.get("/download", async (req, res) => {
+  const url = req.query.url;
+
+  if (!url || !/^https:\/\/.*tiktok\.com\/.+/.test(url)) {
+    return res.status(400).send("Invalid or missing TikTok URL");
+  }
+
+  try {
+    const data = await ttdl(url);
+    const videoUrl = data.video[0];
+    const videoFileName = `video_${Date.now()}.mp4`;
+
+    // Download the video file to local storage
+    const videoStream = fs.createWriteStream(videoFileName);
+    await new Promise((resolve, reject) => {
+      request
+        .get(videoUrl)
+        .on("error", (err) => reject(err))
+        .pipe(videoStream)
+        .on("finish", () => resolve())
+        .on("error", (err) => reject(err));
+    });
+
+    // Increment video download count
+    const videoId = url; // Use a unique identifier for the video
+    await VideoDownload.findOneAndUpdate(
+      { videoId },
+      { $inc: { downloadCount: 1 } },
+      { upsert: true },
+    );
+
+    // Send the video file as a response
+    res.download(videoFileName, async (err) => {
+      if (err) {
+        console.error("Error sending video:", err);
+        res.status(500).send("Error sending video");
+      } else {
+        // Clean up the video file after sending
+        fs.unlinkSync(videoFileName);
+      }
+    });
+  } catch (error) {
+    console.error("Error downloading TikTok video:", error);
+    res.status(500).send("Error downloading TikTok video");
   }
 });
 
