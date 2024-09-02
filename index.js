@@ -21,19 +21,37 @@ const bot = new TelegramBot(token, { polling: true });
 
 const adminId = "5310455183"; // Replace with your Telegram user ID
 
-// Express server
-app.get("/", (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  const data = {
-    status: "true",
-    message: "Bot Successfully Activated!",
-    author: "vimukthi_oshada",
-  };
-  const result = {
-    response: data,
-  };
-  res.send(JSON.stringify(result, null, 2));
+/// Express server to display user count
+app.get("/", async (req, res) => {
+  try {
+    const userCount = await User.countDocuments({});
+    const html = `
+      <html>
+      <head>
+        <title>TikTok Downloader Bot</title>
+      </head>
+      <body>
+        <h1>Bot Successfully Activated!</h1>
+        <p>Author: vimukthi_oshada</p>
+        <p>Total Users: ${userCount}</p>
+      </body>
+      </html>
+    `;
+    res.send(html);
+  } catch (err) {
+    res.status(500).send("Error retrieving user count");
+  }
 });
+
+app.get("/usercount", async (req, res) => {
+  try {
+    const userCount = await User.countDocuments({});
+    res.send(`<h1>Total Users: ${userCount}</h1>`);
+  } catch (err) {
+    res.status(500).send("Error retrieving user count");
+  }
+});
+
 
 function listenOnPort(port) {
   app.listen(port, () => {
