@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 const mongoose = require("mongoose");
 const { User } = require("./database"); // Import the User model
-const app = express();
+
 // Initialize bot with polling
 const token = "6162835664:AAH4U09W70ro9ltzJ4ikopkccIc-YKl3B5U"; // Store your bot token securely
 const bot = new TelegramBot(token, { polling: true });
