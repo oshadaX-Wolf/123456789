@@ -36,13 +36,104 @@ app.get("/", async (req, res) => {
       <html>
       <head>
         <title>TikTok Downloader</title>
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+          }
+
+          h1 {
+            color: #ff4500;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #f7f7f7;
+          }
+
+          p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+          }
+
+          form {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+          }
+
+          label {
+            font-size: 1.2em;
+            color: #333;
+          }
+
+          input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s ease-in-out;
+          }
+
+          input[type="text"]:focus {
+            border-color: #ff4500;
+          }
+
+          button {
+            background-color: #ff4500;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+          }
+
+          button:hover {
+            background-color: #e63e00;
+          }
+
+          .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .result p {
+            font-size: 1.1em;
+            color: #555;
+          }
+
+          .result a {
+            color: #ff4500;
+            text-decoration: none;
+            font-weight: bold;
+          }
+
+          .result a:hover {
+            text-decoration: underline;
+          }
+        </style>
       </head>
       <body>
-        <h1>Welcome to the TikTok Downloader Bot!</h1>
+        <h1>TikTok Downloader Bot</h1>
         <p>Total Users: ${userCount}</p>
         <form action="/download" method="post">
           <label for="url">Paste TikTok URL here:</label><br>
-          <input type="text" id="url" name="url" style="width: 300px;" required><br><br>
+          <input type="text" id="url" name="url" required><br><br>
           <button type="submit">Download</button>
         </form>
         {{result}}
@@ -69,20 +160,113 @@ app.post("/download", async (req, res) => {
 
     const userCount = await User.countDocuments({});
     const resultHtml = `
-      <p>🎥 <strong>Video URL:</strong> <a href="${videoUrl}" target="_blank">${videoUrl}</a></p>
-      <p>🎵 <strong>Audio URL:</strong> <a href="${audioUrl}" target="_blank">${audioUrl}</a></p>
+      <div class="result">
+        <p>🎥 <strong>Video URL:</strong> <a href="${videoUrl}" target="_blank">${videoUrl}</a></p>
+        <p>🎵 <strong>Audio URL:</strong> <a href="${audioUrl}" target="_blank">${audioUrl}</a></p>
+      </div>
     `;
     const html = `
       <html>
       <head>
         <title>TikTok Downloader</title>
+        <style>
+          body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+          }
+
+          h1 {
+            color: #ff4500;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #f7f7f7;
+          }
+
+          p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+          }
+
+          form {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+          }
+
+          label {
+            font-size: 1.2em;
+            color: #333;
+          }
+
+          input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s ease-in-out;
+          }
+
+          input[type="text"]:focus {
+            border-color: #ff4500;
+          }
+
+          button {
+            background-color: #ff4500;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+          }
+
+          button:hover {
+            background-color: #e63e00;
+          }
+
+          .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .result p {
+            font-size: 1.1em;
+            color: #555;
+          }
+
+          .result a {
+            color: #ff4500;
+            text-decoration: none;
+            font-weight: bold;
+          }
+
+          .result a:hover {
+            text-decoration: underline;
+          }
+        </style>
       </head>
       <body>
-        <h1>Welcome to the TikTok Downloader Bot!</h1>
+        <h1>TikTok Downloader Bot</h1>
         <p>Total Users: ${userCount}</p>
         <form action="/download" method="post">
           <label for="url">Paste TikTok URL here:</label><br>
-          <input type="text" id="url" name="url" style="width: 300px;" required><br><br>
+          <input type="text" id="url" name="url" required><br><br>
           <button type="submit">Download</button>
         </form>
         ${resultHtml}
@@ -94,6 +278,7 @@ app.post("/download", async (req, res) => {
     res.status(500).send("Error downloading TikTok video");
   }
 });
+
 
 
 
