@@ -191,8 +191,8 @@ app.post("/download", async (req, res) => {
     const userCount = await User.countDocuments({});
     const resultHtml = `
       <div class="result">
-        <p>🎥 <strong>Video URL:</strong> <a href="${videoUrl}" target="_blank">${videoUrl}</a></p>
-        <p>🎵 <strong>Audio URL:</strong> <a href="${audioUrl}" target="_blank">${audioUrl}</a></p>
+        <p>🎥 <strong>Video URL:</strong> <a href="${videoUrl}" download>Download Video</a></p>
+        <p>🎵 <strong>Audio URL:</strong> <a href="${audioUrl}" download>Download Audio</a></p>
         <div class="video-preview">
           <video controls>
             <source src="${videoUrl}" type="video/mp4">
