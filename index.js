@@ -14,7 +14,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 const mongoose = require("mongoose");
 const { User } = require("./database"); // Import the User model
-
+const app = express();
 // Initialize bot with polling
 const token = "6162835664:AAH4U09W70ro9ltzJ4ikopkccIc-YKl3B5U"; // Store your bot token securely
 const bot = new TelegramBot(token, { polling: true });
@@ -26,40 +26,37 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Express server to display user count and download TikTok videos
+app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded data
+
+// Express server to display user count and handle TikTok downloads
 app.get("/", async (req, res) => {
   try {
     const userCount = await User.countDocuments({});
     const html = `
       <html>
       <head>
-        <title>TikTok Downloader Bot</title>
+        <title>TikTok Downloader</title>
       </head>
       <body>
-        <h1>Bot Successfully Activated!</h1>
-        <p>Author: vimukthi_oshada</p>
+        <h1>Welcome to the TikTok Downloader Bot!</h1>
         <p>Total Users: ${userCount}</p>
+        <form action="/download" method="post">
+          <label for="url">Paste TikTok URL here:</label><br>
+          <input type="text" id="url" name="url" style="width: 300px;" required><br><br>
+          <button type="submit">Download</button>
+        </form>
+        {{result}}
       </body>
       </html>
     `;
-    res.send(html);
+    res.send(html.replace("{{result}}", ""));
   } catch (err) {
-    res.status(500).send("Error retrieving user count");
+    res.status(500).send("Error loading the page");
   }
 });
 
-app.get("/usercount", async (req, res) => {
-  try {
-    const userCount = await User.countDocuments({});
-    res.send(`<h1>Total Users: ${userCount}</h1>`);
-  } catch (err) {
-    res.status(500).send("Error retrieving user count");
-  }
-});
-
-// Endpoint to download TikTok video
-app.get("/download", async (req, res) => {
-  const url = req.query.url;
+app.post("/download", async (req, res) => {
+  const url = req.body.url;
 
   if (!url || !/^https:\/\/.*tiktok\.com\/.+/.test(url)) {
     return res.status(400).send("Invalid or missing TikTok URL");
@@ -68,42 +65,36 @@ app.get("/download", async (req, res) => {
   try {
     const data = await ttdl(url);
     const videoUrl = data.video[0];
-    const videoFileName = `video_${Date.now()}.mp4`;
+    const audioUrl = data.audio[0];
 
-    // Download the video file to local storage
-    const videoStream = fs.createWriteStream(videoFileName);
-    await new Promise((resolve, reject) => {
-      request
-        .get(videoUrl)
-        .on("error", (err) => reject(err))
-        .pipe(videoStream)
-        .on("finish", () => resolve())
-        .on("error", (err) => reject(err));
-    });
-
-    // Increment video download count
-    const videoId = url; // Use a unique identifier for the video
-    await VideoDownload.findOneAndUpdate(
-      { videoId },
-      { $inc: { downloadCount: 1 } },
-      { upsert: true },
-    );
-
-    // Send the video file as a response
-    res.download(videoFileName, async (err) => {
-      if (err) {
-        console.error("Error sending video:", err);
-        res.status(500).send("Error sending video");
-      } else {
-        // Clean up the video file after sending
-        fs.unlinkSync(videoFileName);
-      }
-    });
+    const userCount = await User.countDocuments({});
+    const resultHtml = `
+      <p>🎥 <strong>Video URL:</strong> <a href="${videoUrl}" target="_blank">${videoUrl}</a></p>
+      <p>🎵 <strong>Audio URL:</strong> <a href="${audioUrl}" target="_blank">${audioUrl}</a></p>
+    `;
+    const html = `
+      <html>
+      <head>
+        <title>TikTok Downloader</title>
+      </head>
+      <body>
+        <h1>Welcome to the TikTok Downloader Bot!</h1>
+        <p>Total Users: ${userCount}</p>
+        <form action="/download" method="post">
+          <label for="url">Paste TikTok URL here:</label><br>
+          <input type="text" id="url" name="url" style="width: 300px;" required><br><br>
+          <button type="submit">Download</button>
+        </form>
+        ${resultHtml}
+      </body>
+      </html>
+    `;
+    res.send(html);
   } catch (error) {
-    console.error("Error downloading TikTok video:", error);
     res.status(500).send("Error downloading TikTok video");
   }
 });
+
 
 
 function listenOnPort(port) {
