@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 
 const uri =
-  "mongodb+srv://fxcloudx:fxcloudx@oshada1.wnuhs.mongodb.net/?retryWrites=true&w=majority";
+  "mongodb+srv://filmxyz:filmxyz@filmxyz.qsydfti.mongodb.net/?retryWrites=true&w=majority";
 
 mongoose.connect(uri, {
   useNewUrlParser: true,
